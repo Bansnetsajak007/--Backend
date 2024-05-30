@@ -1,11 +1,16 @@
 // package
-const router = require("express").Router();
-// items
-const fetchuser = require("../middleware/fetchuser");
-const authController = require("../controllers/authController")
+import { Router } from "express";
+const router = Router();
+
+import authController from "../controllers/authController.js";
+import fetchuser from "../middleware/fetchuser.js";
 
 
 // routes
-// router.get("/", authController.get);
-
-module.exports = router;
+router.get("/", authController.get);
+router.post("/otp", authController.SendOTP);
+router.post("/otp/verify", authController.VerifyOTP);
+router.post("/login", authController.Login);  
+router.post("/signup", authController.SignUp);  
+router.get("/logout", fetchuser, authController.Logout);  
+export default router;

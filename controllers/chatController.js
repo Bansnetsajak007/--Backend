@@ -1,3 +1,5 @@
-module.exports = {
+const chatController = {
     
 }
+
+export default chatController

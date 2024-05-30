@@ -1,11 +1,12 @@
 // package
-const router = require("express").Router();
+import {Router} from 'express'
+const router = Router()
+
 // items
-const fetchuser = require("../middleware/fetchuser");
-const animalsController = require("../controllers/animalsController")
+import fetchuser from '../middleware/fetchuser.js';
+import animalsController from '../controllers/animalsController.js';
 
 
 // routes
 // router.get("/", animalsController.get);
-
-module.exports = router;
+export default router

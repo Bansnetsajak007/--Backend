@@ -1,10 +1,12 @@
 // package
-const router = require("express").Router();
+import { Router } from "express";
+const router = Router();
 // items
-const fetchuser = require("../middleware/fetchuser");
-const marketplaceController = require("../controllers/marketplaceController.js")
+import marketplaceController from "../controllers/marketplaceController.js";
+import fetchuser from "../middleware/fetchuser.js";
 
 // routes
-// router.get("/", marketplaceController.get);
+router.get("/", marketplaceController.get);
+router.post("/create", marketplaceController.createPost);
 
-module.exports = router;
+export default router

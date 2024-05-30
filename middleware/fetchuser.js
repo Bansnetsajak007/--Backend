@@ -1,20 +1,26 @@
 // const jwt = require("jsonwebtoken");
 
 const fetchuser = (req, res, next) => {
-//   const farming_token = req.cookies.farming_token;
+	const farmer_token = req.cookies.farmer_token;
 
-//   if (!req.cookies.farming_token) {
-    // TODO: Do something
-// }
+	if (!req.cookies.farmer_token) {
+		return res.status(403).json({message: "Unauthorized user"});
+	}
 
-try {
-    // const data = jwt.verify(farming_token, process.env.JWT_SECRET);
+	try {
+		const data = jwt.verify(farmer_token, process.env.JWT_SECRET);
+		const {username, id, phoneNumber, email} = data;
 
-} catch (error) {
-    // TODO: DO something
-    // console.log(error)
-  }
-//   next();
+		req.username = username;
+		req.email = email;
+        req.id = id;
+        req.phoneNumber = phoneNumber;
+
+        // console.log(data)
+	} catch (error) {
+		return returnAuthRender();
+	}
+	next();
 };
 
-module.exports = fetchuser;
+export default fetchuser;
