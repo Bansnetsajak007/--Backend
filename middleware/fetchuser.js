@@ -4,7 +4,7 @@ const fetchuser = (req, res, next) => {
 	const farmer_token = req.cookies.farmer_token;
 
 	if (!req.cookies.farmer_token) {
-		return res.status(403).json({message: "Unauthorized user"});
+		return res.status(403).json({message: "Unauthorized user - No token provided."});
 	}
 
 	try {

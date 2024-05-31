@@ -42,7 +42,7 @@ const authController = {
 		const dbUser = await User.findOne({email});
 		if (dbUser) {
 			return res.status(403).json({
-				message: `User with ${dbUser.email} was already present in our database`,
+				message: `User with ${dbUser.email} already exists`,
 			});
 		}
 

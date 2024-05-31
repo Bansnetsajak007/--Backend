@@ -37,7 +37,13 @@ app.use("/marketplace", marketplaceRoute);
 
 // hosting
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, async() => {
-  await connectDB();
-  console.log("server is listening in the port: ", PORT);
+// app.listen(PORT, async() => {
+//   await connectDB();
+//   console.log("server is listening in the port: ", PORT);
+// })
+
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running at ${PORT}`);
+})
 })
