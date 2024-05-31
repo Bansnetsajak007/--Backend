@@ -1,4 +1,5 @@
 import Marketplace from "../config/models/marketplaceModel.js";
+import deleteFile from "../utils/fileDelete.js";
 
 const marketController = {
 	get: async (req, res) => {
@@ -38,13 +39,17 @@ const marketController = {
 
 	createPost: async (req, res) => {
 		try {
-			const {itemName, pictureUrl, price, details, location, type, date} =
-				req.body;
+			const {itemName, price, details, location, type, date} =
+			req.body;
+			const pictureUrlObj = {
+				path: req.file.path,
+				name: req.file.originalname,
+			}
 
 			const newMarketPost = await Marketplace.create({
 				userId: req.id,
 				itemName,
-				pictureUrl,
+				pictureUrl: pictureUrlObj,
 				price: parseFloat(price),
 				details,
 				location,
@@ -52,6 +57,9 @@ const marketController = {
 				date,
 			});
 			await newMarketPost.save();
+
+			// removing file from server's uploads folder
+			deleteFile(pictureUrlObj.path);
 
 			return res
 				.status(200)
@@ -67,7 +75,6 @@ const marketController = {
 	updatePost: async (req, res) => {
 		try {
 			const {itemId} = req.params;
-			console.log(req);
 			const {...updateFields} = req.body;
 
 			const updateData = {};
@@ -82,6 +89,15 @@ const marketController = {
 			}
 			updateData.userId = req.id;
 
+			// if user have updated picture
+			if (req.file){
+				const pictureUrlObj = {
+					path: req.file.path,
+					name: req.file.originalname,
+				}
+				updateData.pictureUrl = pictureUrlObj
+			}
+
 			const updatedMarketPost = await Marketplace.findByIdAndUpdate(
 				itemId,
 				updateData,
@@ -91,6 +107,11 @@ const marketController = {
 			if (!updatedMarketPost) {
 				return res.status(404).json({message: "Post not found"});
 			}
+			// delete file after picture updated
+			if (req.file){
+				deleteFile(req.file.path);
+			}
+
 			return res
 				.status(200)
 				.json({message: "Post Updated Successfully", data: updatedMarketPost});

@@ -12,7 +12,16 @@ const marketplaceSchema = new Schema({
 		require: true
 	},
 	pictureUrl: {
-		type: String,
+		type: {
+			path: {
+				type: String,
+				required: true
+			},
+			name: {
+				type: String,
+				required: true	
+			}
+		},
 		require: true,
 	},
 	price: {
