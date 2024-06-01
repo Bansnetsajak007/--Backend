@@ -1,24 +1,33 @@
-import twilio from "twilio";
+/*
+	brain fuckkk
+*/
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const sid = process.env.TWILIO_SID;
+import nodemailer from 'nodemailer';
+import generateRandomCoode from '../utils/phoneOpt.js';
 
-export default async function SendOTPFunc(num) {
-    const client = twilio(accountSid, authToken);
-
-    // TODO: custom code
-	try {
-		const codeSent = await client.verify.v2
-			.services(sid)
-			.verifications.create({
-				to: num,
-				channel: "sms",
-			});
-
-		return '123544'; // TODO: random code for now
-	} catch (err) {
-		console.log(err);
-		throw new Error("Couldn't send OTP to the given number");
-	}
+export default async function SendMailOtp(mail) {
+    const transporter = nodemailer.createTransport({
+		service: 'gmail',
+		host: "smtp.gmail.email",
+		port: 587,
+		auth: {
+			user: 'sajakkhabatari009@gmail.com',
+			pass: 'dsda wukr yacm ypyi'
+		}
+	});
+	
+	const mailOptions = {
+		from: '"Sajak khabatari" <sajakkhabatari009@gmail.com>',
+		to: `${mail}`,
+		subject: 'Testing Email ',
+		text: `${generateRandomCoode()}`,
+	
+	};
+	
+	const info = await transporter.sendMail(mailOptions, (error, info) => {
+		if (error) {
+			return console.log(error);
+		}
+		console.log('Message sent: %s', info.messageId);
+	});
 }

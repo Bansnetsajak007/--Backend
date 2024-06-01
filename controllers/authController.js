@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 import User from "../config/models/userModel.js";
 import bcrypt from "bcryptjs";
-import SendOTPFunc from "../utils/phoneOpt.js";
+import SendMailOtp from "../utils/phoneOpt.js";
 
 let userOTP;
 
@@ -14,11 +14,11 @@ const authController = {
 
 	// Message based OTP verification
 	SendOTP: async (req, res) => {
-		const {phoneNumber} = req.body;
+		const {email} = req.body;
 		try{
-			const code = await SendOTPFunc(phoneNumber);
-			console.log(code)
-			userOTP = code;
+			const SixDigitcode = await SendOTPFunc(email);
+			console.log(SixDigitcode);
+			// userOTP = code;
 			return res.status(200).json({message: "OTP send successfully"})
 		}
 		catch(err){
