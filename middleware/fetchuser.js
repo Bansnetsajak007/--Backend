@@ -1,4 +1,4 @@
-// const jwt = require("jsonwebtoken");
+import jwt from 'jsonwebtoken'
 
 const fetchuser = (req, res, next) => {
 	const farmer_token = req.cookies.farmer_token;
@@ -18,7 +18,7 @@ const fetchuser = (req, res, next) => {
 
         // console.log(data)
 	} catch (error) {
-		return returnAuthRender();
+		return res.status(403).json({message: "Unauthorized user - No token provided."});
 	}
 	next();
 };

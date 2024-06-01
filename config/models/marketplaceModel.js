@@ -2,8 +2,26 @@ import mongoose from "mongoose";
 const {models, Schema, model} = mongoose;
 
 const marketplaceSchema = new Schema({
-	pictureUrl: {
+	userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+	itemName: {
 		type: String,
+		require: true
+	},
+	pictureUrl: {
+		type: {
+			path: {
+				type: String,
+				required: true
+			},
+			name: {
+				type: String,
+				required: true	
+			}
+		},
 		require: true,
 	},
 	price: {
@@ -22,6 +40,7 @@ const marketplaceSchema = new Schema({
 		type: String,
 		enum: ["sale", "rent"],
 		require: true,
+		default: "sale"
 	},
 	date: {
 		type: Date,
