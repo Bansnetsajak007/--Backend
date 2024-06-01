@@ -3,31 +3,36 @@
 */
 
 import nodemailer from 'nodemailer';
-import generateRandomCoode from '../utils/phoneOpt.js';
+import generateRandomCode from '../utils/randOtp.js';
+import { config } from 'dotenv';
+
+config();
 
 export default async function SendMailOtp(mail) {
-    const transporter = nodemailer.createTransport({
+	const sixDigitCode = generateRandomCode();
+	const transporter = nodemailer.createTransport({
 		service: 'gmail',
-		host: "smtp.gmail.email",
+		host: 'smtp.gmail.com',
 		port: 587,
+		secure: false, // true for 465, false for other ports
 		auth: {
-			user: 'sajakkhabatari009@gmail.com',
-			pass: 'dsda wukr yacm ypyi'
-		}
+			user: process.env.EMAIL_USER,
+			pass: process.env.EMAIL_PASS,
+		},
 	});
-	
+
 	const mailOptions = {
-		from: '"Sajak khabatari" <sajakkhabatari009@gmail.com>',
-		to: `${mail}`,
-		subject: 'Testing Email ',
-		text: `${generateRandomCoode()}`,
-	
+		from: '"Sajak Khabatari" <sajakkhabatari009@gmail.com>',
+		to: mail,
+		subject: 'Testing Email',
+		text: `<b>${sixDigitCode}</b>`,
 	};
-	
-	const info = await transporter.sendMail(mailOptions, (error, info) => {
-		if (error) {
-			return console.log(error);
-		}
+
+	try {
+		const info = await transporter.sendMail(mailOptions);
 		console.log('Message sent: %s', info.messageId);
-	});
+		return sixDigitCode;
+	} catch (error) {
+		console.error('Error sending email:', error);
+	}
 }

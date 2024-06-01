@@ -16,15 +16,16 @@ const authController = {
 	SendOTP: async (req, res) => {
 		const {email} = req.body;
 		try{
-			const SixDigitcode = await SendOTPFunc(email);
+			const SixDigitcode = await SendMailOtp(email);
 			console.log(SixDigitcode);
 			// userOTP = code;
-			return res.status(200).json({message: "OTP send successfully"})
+			if(SixDigitcode) return res.status(200).json({message: "OTP send successfully"})
 		}
 		catch(err){
 			return res.status(400).json({message: err.message})
 		}
 	},
+	//TODO: review VerifyOTP
 	VerifyOTP: async (req, res) => {
 		const {OTP} = req.body;
 		if (OTP == userOTP){
