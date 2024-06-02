@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-
 import User from "../config/models/userModel.js";
 import bcrypt from "bcryptjs";
 import SendMailOtp from "../utils/phoneOpt.js";
@@ -18,7 +17,7 @@ const authController = {
 		try{
 			const SixDigitcode = await SendMailOtp(email);
 			console.log(SixDigitcode);
-			// userOTP = code;
+			userOTP = SixDigitcode;
 			if(SixDigitcode) return res.status(200).json({message: "OTP send successfully"})
 		}
 		catch(err){
@@ -28,7 +27,7 @@ const authController = {
 	//TODO: review VerifyOTP
 	VerifyOTP: async (req, res) => {
 		const {OTP} = req.body;
-		if (OTP == userOTP){
+		if (OTP === userOTP){
 			return res.status(200).json({message: "User authenticated successfully"});
 		}
 		return res.status(400).json({message: "User authentication failed"});
