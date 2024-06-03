@@ -9,6 +9,7 @@ import {config} from "dotenv"
 import marketplaceRoute from './router/marketplaceRoute.js'
 import authRoute from './router/authRoute.js'
 import connectDB from './config/dbConfig.js'
+import blogsRoute from './router/blogsRoute.js'
 
 // configs
 const app = express();
@@ -34,6 +35,7 @@ app.use(cookieParser());
 // standard routes
 app.use("/auth", authRoute);
 app.use("/marketplace", marketplaceRoute);
+app.use("/blog", blogsRoute);
 
 // hosting
 const PORT = 6000;
