@@ -11,8 +11,8 @@ const messageSchema = new Schema(
 			type: Boolean,
 			default: false,
 		},
-		fromId: {
-			type: mongoose.Schema.ObjectId,
+		senderId: {
+			type: Types.ObjectId,
 			required: true,
 			ref: "User",
 		},
@@ -22,12 +22,12 @@ const messageSchema = new Schema(
 
 const conversationSchema = new Schema(
 	{
-		sender: {
+		senderId: {
 			type: Types.ObjectId,
 			required: true,
 			ref: "User",
 		},
-		receiver: {
+		receiverId: {
 			type: Types.ObjectId,
 			required: true,
 			ref: "User",
@@ -41,6 +41,8 @@ const conversationSchema = new Schema(
 	},
 	{timestamps: true}
 );
+
+conversationSchema.index({ sender: 1, receiver: 1 }); // indexing uses b-tree and search operation is O(logn)
 
 const Message = models.Message || model("Message", messageSchema);
 const Conversation =
