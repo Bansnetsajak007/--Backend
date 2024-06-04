@@ -13,20 +13,36 @@ import chatRoute from "./router/chatRoute.js";
 import connectDB from "./config/dbConfig.js";
 import blogsRoute from "./router/blogsRoute.js";
 
+// temp route
+import userRoute from "./router/temp/userRoute.js"
+
 // configs
 // export const app = express();
 config();
 app.use(express.json());
 
+// TEMP: for client side testing and allowing all origin. TODO: Remove in Production
+const allowCors = (req, res, next) => {
+  const origin = req.headers.origin;
+  res.header('Access-Control-Allow-Origin', origin);
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+};
+app.use(allowCors); // TODO: Remove in production
+
+
 // middleware
 app.use(express.urlencoded({extended: true}));
-app.use(
-	cors({
-		origin: "*",
-		credentials: true,
-		methods: ["GET", "POST", "DELETE", "PATCH"],
-	})
-);
+// TODO: Uncomment in production
+// app.use(
+// 	cors({
+// 		origin: "*",
+// 		credentials: true,
+// 		methods: ["GET", "POST", "DELETE", "PATCH"],
+// 	})
+// );
 app.use(cookieParser());
 
 // Temp Routes
@@ -38,6 +54,9 @@ app.use("/auth", authRoute);
 app.use("/marketplace", marketplaceRoute);
 app.use("/chat", chatRoute);
 app.use("/blog", blogsRoute);
+
+// Temp route
+app.use("/users", userRoute);
 
 // hosting
 const PORT = parseInt(process.env.PORT) || 6000;

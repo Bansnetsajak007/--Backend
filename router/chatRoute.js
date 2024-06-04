@@ -6,6 +6,6 @@ import fetchuser from "../middleware/fetchuser.js";
 import chatController from "../controllers/chatController.js";
 
 // routes
-// router.get("/", chatController.get);
+router.get("/:id", chatController.get);
 
 export default router

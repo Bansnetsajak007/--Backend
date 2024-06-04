@@ -19,6 +19,7 @@ const io = new Server(server, {
 const onlineUser = new Map(); // storing on (changableClientSocket, client's User Model's _id )
 
 io.on("connection", async (socket) => {
+	console.log("socket id: ", socket.id)
 	const mutableClientSocketId = socket.id; // client socket id
 
 	// using mongoDb _id as a socket identifier
@@ -117,6 +118,7 @@ io.on("connection", async (socket) => {
 	//disconnect
 	socket.on("disconnect", () => {
 		onlineUser.delete(mutableClientSocketId);
+		io.emit("onlineUser", Array.from(onlineUser.values()));
 		console.log("disconnect user ", socket.id);
 	});
 });
