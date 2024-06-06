@@ -3,8 +3,6 @@ import {Server} from "socket.io";
 import http from "http";
 
 import {Conversation, Message} from "../config/models/chatModel.js";
-import {getConversation} from "../utils/getConversation.js";
-
 
 export const app = express();
 const server = http.createServer(app);
@@ -16,24 +14,24 @@ const io = new Server(server, {
 });
 
 //online user
-const onlineUser = new Map(); // storing on (changableClientSocket, client's User Model's _id )
+const onlineUser = new Map(); // storing on (client's User Model's _id, changableClientSocket )
 
 io.on("connection", async (socket) => {
-	console.log("socket id: ", socket.id)
 	const mutableClientSocketId = socket.id; // client socket id
 
 	// using mongoDb _id as a socket identifier
 	//DON'T forget. client-socket will have auth: {token: mongoDB_id} in io connection
 	socket.id = socket.handshake.auth.token; // setting client's _id as socket_id in server
-	console.log(`User connected: ${socket.id}`);
+	console.log(
+		`User connected: ${socket.id}, original socketId: ${mutableClientSocketId}`
+	);
 
 	socket.join(socket.id); // create one room
-	onlineUser.set(mutableClientSocketId, socket.id); // list of online users
-
+	onlineUser.set(socket.id, mutableClientSocketId); // list of online users
 	// console.log(onlineUser);
 
 	// emit list of users available online
-	io.emit("onlineUser", Array.from(onlineUser.values()));
+	io.emit("onlineUser", Array.from(onlineUser.keys()));
 
 	/* messageObj shall hold = {
         senderId,
@@ -41,12 +39,16 @@ io.on("connection", async (socket) => {
         message,
     } */
 	socket.on("sendMessage", async (messageObj) => {
-		console.log(messageObj);
 		const {senderId, receiverId} = messageObj;
 
 		try {
 			// conversation exist?
-			let conversation = await Conversation.findOne({senderId, receiverId});
+			let conversation = await Conversation.findOne({
+				$or: [
+					{senderId, receiverId},
+					{senderId: receiverId, receiverId: senderId},
+				],
+			});
 			// no conversation exist
 			if (!conversation) {
 				const newConversation = await Conversation.create({
@@ -63,56 +65,75 @@ io.on("connection", async (socket) => {
 			});
 			const saveMessage = await message.save();
 
-			// updating conversation
+			// updating conversation's message field
 			const updateConversation = await Conversation.updateOne(
 				{_id: conversation._id},
 				{$push: {messages: saveMessage._id}}
 			);
 
-			const getConversationMessage = await Conversation.findOne({
-				$or: [
-					{senderId, receiverId},
-					{sender: receiverId, receiver: senderId},
-				],
-			})
-				.populate("messages")
-				.sort({updatedAt: -1});
+			// get user's changable socket id from onlineUser map
+			const senderSocketId = onlineUser.get(senderId);
+			const receiverSocketId = onlineUser.get(receiverId);
 
-                
-			io.to(mutableClientSocketId).emit("receiveMessage", messageObj); // TODO: remove in production. [testing purposes]
-			// sending message element to both sender and receiver
-			// io.to(senderId).emit("receiveMessage", messageObj);
-			io.to(receiverId).emit("receiveMessage", messageObj);
+			// check if users are online before sending socket for less load on server [P.E]
+			if (senderSocketId) {
+				io.to(senderSocketId).emit("receiveMessage", saveMessage);
+			}
+			if (senderSocketId) {
+				io.to(receiverSocketId).emit("receiveMessage", saveMessage);
+			}
+
 		} catch (err) {
 			console.log(err);
 		}
 	});
 
-	// on message box view, we'll emit seen where msgByUserId={senderId, receiverId}
-	socket.on("seen", async (msgByUserId) => {
-		const {senderId, receiverId} = msgByUserId;
+	socket.on("getConversationMessages", async(roomUsersId)=> {
+		const {viewer, roomer} = roomUsersId;
 
-		let conversation = await Conversation.findOne({
+		// get conversation
+		const conversation = await Conversation.findOne({
 			$or: [
-				{senderId, receiverId},
-				{senderId, receiverId},
+				{senderId: viewer, receiverId: roomer},
+				{senderId: roomer, receiverId: viewer},
 			],
 		});
 
+		if(!conversation) return;
+
 		const conversationMessageId = conversation?.messages || [];
 
-		// set all message to seen, TODO: definately change the seen processing
+		const viewerSocketId = onlineUser.get(viewer);
+		const messages = await Message.find({
+			_id: {$in: conversationMessageId}, // messageIdList is the array of message IDs
+		});
+
+		io.to(viewerSocketId).emit("receiveConversation", messages);
+
+	})
+
+	// on message box view, we'll emit seen where roomUsersId={viewer, roomer}
+	socket.on("seen", async (roomUsersId) => {
+		const {viewer, roomer} = roomUsersId;
+		// console.log(viewer, roomer);
+
+		// get conversation
+		const conversation = await Conversation.findOne({
+			$or: [
+				{senderId: viewer, receiverId: roomer},
+				{senderId: roomer, receiverId: viewer},
+			],
+		});
+
+
+		const conversationMessageId = conversation?.messages || [];
 		const updateMessages = await Message.updateMany(
-			{_id: {$in: conversationMessageId}, msgByUserId: msgByUserId},
+			{
+				_id: {$in: conversationMessageId},
+				senderId: {$ne: viewer}, // senderId is not viewer
+			},
 			{$set: {seen: true}}
 		);
-
-		//send conversation
-		const conversationSender = await getConversation(user?._id?.toString());
-		const conversationReceiver = await getConversation(msgByUserId);
-
-		io.to(user?._id?.toString()).emit("conversation", conversationSender);
-		io.to(msgByUserId).emit("conversation", conversationReceiver);
 	});
 
 	//disconnect
@@ -123,4 +144,4 @@ io.on("connection", async (socket) => {
 	});
 });
 
-export { server };
+export {server};
