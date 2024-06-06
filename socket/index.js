@@ -79,16 +79,15 @@ io.on("connection", async (socket) => {
 			if (senderSocketId) {
 				io.to(senderSocketId).emit("receiveMessage", saveMessage);
 			}
-			if (senderSocketId) {
+			if (receiverSocketId) {
 				io.to(receiverSocketId).emit("receiveMessage", saveMessage);
 			}
-
 		} catch (err) {
 			console.log(err);
 		}
 	});
 
-	socket.on("getConversationMessages", async(roomUsersId)=> {
+	socket.on("getConversationMessages", async (roomUsersId) => {
 		const {viewer, roomer} = roomUsersId;
 
 		// get conversation
@@ -99,7 +98,7 @@ io.on("connection", async (socket) => {
 			],
 		});
 
-		if(!conversation) return;
+		if (!conversation) return;
 
 		const conversationMessageId = conversation?.messages || [];
 
@@ -109,31 +108,21 @@ io.on("connection", async (socket) => {
 		});
 
 		io.to(viewerSocketId).emit("receiveConversation", messages);
+	});
 
-	})
-
-	// on message box view, we'll emit seen where roomUsersId={viewer, roomer}
-	socket.on("seen", async (roomUsersId) => {
-		const {viewer, roomer} = roomUsersId;
-		// console.log(viewer, roomer);
-
-		// get conversation
-		const conversation = await Conversation.findOne({
-			$or: [
-				{senderId: viewer, receiverId: roomer},
-				{senderId: roomer, receiverId: viewer},
-			],
-		});
-
-
-		const conversationMessageId = conversation?.messages || [];
-		const updateMessages = await Message.updateMany(
-			{
-				_id: {$in: conversationMessageId},
-				senderId: {$ne: viewer}, // senderId is not viewer
-			},
-			{$set: {seen: true}}
+	socket.on("seen", async ({newMessageId, senderId}) => {
+		// updatedMessage
+		const updatedMessage = await Message.findByIdAndUpdate(
+			newMessageId,
+			{$set: {seen: true}},
+			{new: true}
 		);
+
+		// Gotta optimize.
+		const senderSocketId = onlineUser.get(senderId);
+		if (senderSocketId){
+			io.to(senderSocketId).emit("receiveMessage", updatedMessage);
+		}
 	});
 
 	//disconnect

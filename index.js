@@ -14,7 +14,7 @@ import connectDB from "./config/dbConfig.js";
 import blogsRoute from "./router/blogsRoute.js";
 
 // temp route
-import userRoute from "./router/temp/userRoute.js"
+import userRoute from "./router/temp/userRoute.js";
 
 // configs
 // export const app = express();
@@ -23,15 +23,17 @@ app.use(express.json());
 
 // TEMP: for client side testing and allowing all origin. TODO: Remove in Production
 const allowCors = (req, res, next) => {
-  const origin = req.headers.origin;
-  res.header('Access-Control-Allow-Origin', origin);
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
+	const origin = req.headers.origin;
+	res.header("Access-Control-Allow-Origin", origin);
+	res.header("Access-Control-Allow-Credentials", true);
+	res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+	res.header(
+		"Access-Control-Allow-Headers",
+		"Origin, X-Requested-With, Content-Type, Accept"
+	);
+	next();
 };
 app.use(allowCors); // TODO: Remove in production
-
 
 // middleware
 app.use(express.urlencoded({extended: true}));
@@ -55,7 +57,7 @@ app.use("/marketplace", marketplaceRoute);
 app.use("/chat", chatRoute);
 app.use("/blog", blogsRoute);
 
-// Temp route
+// Temp route -> for socket testing
 app.use("/users", userRoute);
 
 // hosting
@@ -66,13 +68,13 @@ const PORT = parseInt(process.env.PORT) || 6000;
 // })
 
 connectDB().then(() => {
-  // nodejs server
+	// nodejs server
 	app.listen(PORT, () => {
 		console.log(`Server running at ${PORT}`);
 	});
 
-  // socket server
-	server.listen(PORT + 1, ()=> {
-    console.log(`Socket.io is running at ${PORT+1}`)
-  });
+	// socket server
+	server.listen(PORT + 1, () => {
+		console.log(`Socket.io is running at ${PORT + 1}`);
+	});
 });
