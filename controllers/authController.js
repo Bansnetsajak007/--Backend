@@ -69,10 +69,11 @@ const authController = {
 	Login: async (req, res) => {
 		const {email, password} = req.body;
 
-		// Token check if present or not
-		if (!req.cookies.farmer_token) {
-			res.clearCookie("farmer_token");
-		}
+		console.log(req.body)
+		// // Token check if present or not
+		// if (!req.cookies.farmer_token) {
+		// 	res.clearCookie("farmer_token");
+		// }
 
 		try {
 			const dbUser = await User.findOne({email});
@@ -101,9 +102,10 @@ const authController = {
 				path: "/",
 				httpOnly: true,
 				secure: true,
+				sameSite: "None"
 			});
 
-			return res.status(200).json({message: "Successfully logged in"});
+			return res.status(200).json({message: "Successfully logged in", data});
 		} catch (err) {
 			console.error("Error during login", err);
 			return res.status(500).json({message: "Internal server error"});

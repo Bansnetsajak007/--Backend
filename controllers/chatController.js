@@ -1,5 +1,12 @@
-const chatController = {
-    
-}
+// import { getConversation } from "../utils/getConversation.js"
 
-export default chatController
+// const chatController = {
+//     get: async(req, res)=> {
+//         const {userId} = req.params;
+
+//         const data = await getConversation(userId);
+//         console.log(data)
+//     }
+// }
+
+// export default chatController
