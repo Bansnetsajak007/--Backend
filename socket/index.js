@@ -83,18 +83,17 @@ io.on("connection", async (socket) => {
 				io.to(senderSocketId).emit("receiveMessage", saveMessage);
 
 				// // if new conversation, emit to user so, one can list people, he had conversate with
-				// if (isNewConversation) {
-				// 	const userData = await User.find({_id: receiverId}, "username email");
-				// 	io.to(senderSocketId).emit("newConversationStart", userData);
-				// }
+				if (isNewConversation) {
+					const userData = await User.find({_id: receiverId}, "username email");
+					io.to(senderSocketId).emit("newConversationStart", userData);
+				}
 			}
 			if (receiverSocketId) {
-				io.to(receiverSocketId).emit("receiveMessage", saveMessage);
-				// io.to(receiverSocketId).emit("newMessage", {id: senderId, seen: false}); // notify new msg
-				// if (isNewConversation) {
-				// 	const userData = await User.find({_id: senderId}, "username email");
-				// 	io.to(receiverSocketId).emit("newConversationStart", userData);
-				// }
+				io.to(receiverSocketId).emit("receiveMessage", saveMessage); // send message, as well as notify
+				if (isNewConversation) {
+					const userData = await User.find({_id: senderId}, "username email");
+					io.to(receiverSocketId).emit("newConversationStart", userData);
+				}
 			}
 		} catch (err) {
 			console.log(err);
@@ -129,15 +128,15 @@ io.on("connection", async (socket) => {
 		});
 
 		// get lately received msg from sender and emit it had been seen to the sender
-		for (let i=messages.length-1; i>=0; i--){
+		for (let i = messages.length - 1; i >= 0; i--) {
 			const senderId = messages[i].senderId;
-			if (senderId != viewer){
+			if (senderId != viewer) {
 				const senderSocketId = onlineUser.get(roomer);
 				// console.log(senderId, senderSocketId)
 				// console.log(messages[i]._id, messages[i].senderId)
 
-				if (senderSocketId){
-					io.to(senderSocketId).emit('messageSeen', messages[i]._id)
+				if (senderSocketId) {
+					io.to(senderSocketId).emit("messageSeen", messages[i]._id);
 				}
 				break;
 			}
