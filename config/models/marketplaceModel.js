@@ -11,6 +11,11 @@ const marketplaceSchema = new Schema({
 		type: String,
 		require: true
 	},
+	itemType: {
+		type: String,
+		enum: ["animal", "product", "tool", "machinery"],
+		require: true
+	},
 	pictureUrl: {
 		type: {
 			path: {

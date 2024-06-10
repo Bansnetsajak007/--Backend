@@ -3,6 +3,7 @@ import {Server} from "socket.io";
 import http from "http";
 
 import {Conversation, Message} from "../config/models/chatModel.js";
+import User from "../config/models/userModel.js";
 
 export const app = express();
 const server = http.createServer(app);
@@ -39,6 +40,7 @@ io.on("connection", async (socket) => {
         message,
     } */
 	socket.on("sendMessage", async (messageObj) => {
+		let isNewConversation = false;
 		const {senderId, receiverId} = messageObj;
 
 		try {
@@ -56,6 +58,7 @@ io.on("connection", async (socket) => {
 					receiverId,
 				});
 				conversation = await newConversation.save();
+				isNewConversation = true;
 			}
 
 			// creating message
@@ -78,9 +81,19 @@ io.on("connection", async (socket) => {
 			// check if users are online before sending socket for less load on server [P.E]
 			if (senderSocketId) {
 				io.to(senderSocketId).emit("receiveMessage", saveMessage);
+
+				// // if new conversation, emit to user so, one can list people, he had conversate with
+				if (isNewConversation) {
+					const userData = await User.find({_id: receiverId}, "username email");
+					io.to(senderSocketId).emit("newConversationStart", userData);
+				}
 			}
 			if (receiverSocketId) {
-				io.to(receiverSocketId).emit("receiveMessage", saveMessage);
+				io.to(receiverSocketId).emit("receiveMessage", saveMessage); // send message, as well as notify
+				if (isNewConversation) {
+					const userData = await User.find({_id: senderId}, "username email");
+					io.to(receiverSocketId).emit("newConversationStart", userData);
+				}
 			}
 		} catch (err) {
 			console.log(err);
@@ -101,27 +114,44 @@ io.on("connection", async (socket) => {
 		if (!conversation) return;
 
 		const conversationMessageId = conversation?.messages || [];
+		await Message.updateMany(
+			{
+				_id: {$in: conversationMessageId},
+				senderId: {$ne: viewer}, // senderId is not viewer
+			},
+			{$set: {seen: true}}
+		);
 
 		const viewerSocketId = onlineUser.get(viewer);
 		const messages = await Message.find({
 			_id: {$in: conversationMessageId}, // messageIdList is the array of message IDs
 		});
 
+		// get lately received msg from sender and emit it had been seen to the sender
+		for (let i = messages.length - 1; i >= 0; i--) {
+			const senderId = messages[i].senderId;
+			if (senderId != viewer) {
+				const senderSocketId = onlineUser.get(roomer);
+				// console.log(senderId, senderSocketId)
+				// console.log(messages[i]._id, messages[i].senderId)
+
+				if (senderSocketId) {
+					io.to(senderSocketId).emit("messageSeen", messages[i]._id);
+				}
+				break;
+			}
+		}
+
 		io.to(viewerSocketId).emit("receiveConversation", messages);
 	});
 
 	socket.on("seen", async ({newMessageId, senderId}) => {
 		// updatedMessage
-		const updatedMessage = await Message.findByIdAndUpdate(
-			newMessageId,
-			{$set: {seen: true}},
-			{new: true}
-		);
+		await Message.findByIdAndUpdate(newMessageId, {$set: {seen: true}});
 
-		// Gotta optimize.
 		const senderSocketId = onlineUser.get(senderId);
-		if (senderSocketId){
-			io.to(senderSocketId).emit("receiveMessage", updatedMessage);
+		if (senderSocketId) {
+			io.to(senderSocketId).emit("messageSeen", newMessageId);
 		}
 	});
 
