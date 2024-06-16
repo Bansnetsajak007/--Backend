@@ -2,6 +2,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import session from 'express-session'
 import {config} from "dotenv";
 
 import {app, server} from "./socket/index.js";
@@ -16,10 +17,16 @@ import blogsRoute from "./router/blogsRoute.js";
 // temp route
 import userRoute from "./router/temp/userRoute.js";
 
+
 // configs
-// export const app = express();
 config();
 app.use(express.json());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Set to true if using HTTPS
+}));
 
 // TEMP: for client side testing and allowing all origin. TODO: Remove in Production
 const allowCors = (req, res, next) => {
@@ -47,10 +54,6 @@ app.use(express.urlencoded({extended: true}));
 // );
 app.use(cookieParser());
 
-// Temp Routes
-// app.use("/sajak", require('./temp/sajakRoutes/index'));
-// app.use("/surya", require('./temp/suryaRoutes/index'));
-
 // standard routes
 app.use("/auth", authRoute);
 app.use("/marketplace", marketplaceRoute);
@@ -62,10 +65,7 @@ app.use("/users", userRoute);
 
 // hosting
 const PORT = parseInt(process.env.PORT) || 6000;
-// app.listen(PORT, async() => {
-//   await connectDB();
-//   console.log("server is listening in the port: ", PORT);
-// })
+
 
 connectDB().then(() => {
 	// nodejs server

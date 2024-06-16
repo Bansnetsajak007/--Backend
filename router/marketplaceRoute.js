@@ -7,7 +7,7 @@ import fetchuser from "../middleware/fetchuser.js";
 import fileUpload from "../middleware/fileUpload.js";
 
 // routes
-router.get("/", marketplaceController.get);
+router.get("/", fetchuser, marketplaceController.get);
 // posts that user had created
 router.get("/posts", fetchuser, marketplaceController.getUserSpecificPost); 
 // no user specific, ( any post )
