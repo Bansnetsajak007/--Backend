@@ -18,6 +18,15 @@ const userSchema = new Schema({
 		type: String,
 		require: true,
 	},
+	description: {
+		type: String,
+		maxLength: 500
+	},
+	type: {
+		type: String,
+		enum: ["Farmer", "Expert"],
+		require: true
+	}
 });
 
 const User = models.User || model("User", userSchema);

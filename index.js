@@ -14,9 +14,8 @@ import chatRoute from "./router/chatRoute.js";
 import connectDB from "./config/dbConfig.js";
 import blogsRoute from "./router/blogsRoute.js";
 
-// temp route
-import userRoute from "./router/temp/userRoute.js";
-
+// useful route
+import userRoute from './router/userRoute.js'
 
 // configs
 config();
@@ -60,7 +59,7 @@ app.use("/marketplace", marketplaceRoute);
 app.use("/chat", chatRoute);
 app.use("/blog", blogsRoute);
 
-// Temp route -> for socket testing
+// using route -> for socket testing
 app.use("/users", userRoute);
 
 // hosting

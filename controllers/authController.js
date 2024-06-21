@@ -8,8 +8,8 @@ import storeToCookie from "../utils/cookieStore.js";
 const authController = {
 	// root
 	get: (req, res) => {
-		const {username, userId, phoneNumber, email} = req;
-		res.status(200).json({data: {username, userId, phoneNumber, email}});
+		const {username, userId, phoneNumber, email, description, type} = req;
+		res.status(200).json({data: {username, userId, phoneNumber, email, description, type}});
 	},
 
 	// Message based OTP verification
@@ -45,8 +45,8 @@ const authController = {
 	// END
 
 	SignUp: async (req, res) => {
-		const {username, email, password, phoneNumber} = req.body;
-		console.log(username, email, password, phoneNumber);
+		const {username, email, password, phoneNumber, type, description} = req.body;
+		console.log(username, email, password, phoneNumber, type, description);
 		const hashedPassword = bcrypt.hashSync(password, 10);
 
 		try {
@@ -55,6 +55,8 @@ const authController = {
 				email,
 				password: hashedPassword,
 				phoneNumber,
+				type,
+				description
 			});
 			await newUser.save();
 

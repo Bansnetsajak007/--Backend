@@ -39,7 +39,7 @@ const marketController = {
 
 	createPost: async (req, res) => {
 		try {
-			const {itemName, price, details, location, type, date} =
+			const {itemName, price, details, location, type, date, postedBy} =
 			req.body;
 			const pictureUrlObj = {
 				path: req.file.path,
@@ -48,6 +48,7 @@ const marketController = {
 
 			const newMarketPost = await Marketplace.create({
 				userId: req.id,
+				postedBy,
 				itemName,
 				pictureUrl: pictureUrlObj,
 				price: parseFloat(price),

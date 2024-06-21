@@ -9,12 +9,14 @@ const fetchuser = (req, res, next) => {
 
 	try {
 		const data = jwt.verify(farmer_token, process.env.JWT_SECRET);
-		const {username, userId, phoneNumber, email} = data;
+		const {username, userId, phoneNumber, email, type, description} = data;
 
 		req.username = username;
 		req.email = email;
         req.userId = userId;
         req.phoneNumber = phoneNumber;
+		req.type = type
+		req.description = description
 
         // console.log(data)
 	} catch (error) {
