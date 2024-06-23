@@ -39,7 +39,7 @@ const userController = {
 
 				chattedUserInfo = await User.find(
 					{_id: {$in: chattedUserId}},
-					"username email"
+					"username email phoneNumber type"
 				);
 			}
 
@@ -47,7 +47,7 @@ const userController = {
 				.status(200)
 				.json({
 					message: "retrieved users successfully",
-					users,
+					// users, // TODO: check if it's needed or not. => seems like not
 					chattedUsers: chattedUserInfo,
 				});
 		} catch (err) {

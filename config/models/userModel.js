@@ -22,6 +22,10 @@ const userSchema = new Schema({
 		type: String,
 		maxLength: 500
 	},
+	location: {
+		type: String,
+		require: true
+	},
 	type: {
 		type: String,
 		enum: ["Farmer", "Expert"],

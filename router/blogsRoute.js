@@ -6,11 +6,12 @@ import fetchuser from "../middleware/fetchuser.js";
 import blogsController from "../controllers/blogsController.js";
 
 // routes
-router.get("/", fetchuser,  blogsController.get);
-router.post("/newPost", fetchuser, blogsController.createPost);
-router.get("/getpost/:id", fetchuser, blogsController.getPost);
-router.put("/update/:id", fetchuser, blogsController.updatePost);  
-router.delete("/delete/:id",fetchuser, blogsController.deletePost);  
+router.get("/", blogsController.get);
+router.get("/user/:userId", fetchuser, blogsController.getUserPosts);
+router.post("/:userId", fetchuser, blogsController.createPost);
+router.get("/:id", blogsController.getSinglePost);
+router.patch("/:id", blogsController.updatePost);  
+router.delete("/:id", blogsController.deletePost);  
 
 
 export default router
