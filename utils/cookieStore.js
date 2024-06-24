@@ -6,7 +6,8 @@ export default function storeToCookie (dbUser, res) {
         username: dbUser.username,
         email: dbUser.email,
         phoneNumber: dbUser.phoneNumber,
-        type: dbUser.type
+        type: dbUser.type,
+        location: dbUser.location
     };
 
     const farmer_token = jwt.sign(data, process.env.JWT_SECRET, {

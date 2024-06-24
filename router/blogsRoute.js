@@ -7,11 +7,13 @@ import blogsController from "../controllers/blogsController.js";
 
 // routes
 router.get("/", blogsController.get);
-router.get("/user/:userId", fetchuser, blogsController.getUserPosts);
-router.post("/:userId", fetchuser, blogsController.createPost);
+router.get("/user", fetchuser, blogsController.getUserPosts);
+router.get("/user-related/:userId", fetchuser, blogsController.getUserRelatedPosts);
+router.get("/user/:id", fetchuser, blogsController.getSingleUserPost);
+router.post("/", fetchuser, blogsController.createPost);
 router.get("/:id", blogsController.getSinglePost);
-router.patch("/:id", blogsController.updatePost);  
-router.delete("/:id", blogsController.deletePost);  
+router.patch("/:id",fetchuser, blogsController.updatePost);  
+router.delete("/:id", fetchuser, blogsController.deletePost);  
 
 
 export default router

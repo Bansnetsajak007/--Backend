@@ -45,8 +45,8 @@ const authController = {
 	// END
 
 	SignUp: async (req, res) => {
-		const {username, email, password, phoneNumber, type, description} = req.body;
-		console.log(username, email, password, phoneNumber, type, description);
+		const {username, email, password, phoneNumber, type, description, location} = req.body;
+		// console.log(username, email, password, phoneNumber, type, description);
 		const hashedPassword = bcrypt.hashSync(password, 10);
 
 		try {
@@ -56,6 +56,7 @@ const authController = {
 				password: hashedPassword,
 				phoneNumber,
 				type,
+				location,
 				description
 			});
 			await newUser.save();

@@ -4,21 +4,30 @@ const blogsController = {
 	get: async (req, res) => {
 		try {
 			const data = await Blogs.find().sort({updatedAt: -1});
-			if (data)
-				return res.status(200).json({data});
+			if (data) return res.status(200).json({data});
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({message: error.message});
 		}
 	},
 
-	getUserPosts: async(req, res) => {
-    const {userId} = req.params;
-    
+	getUserPosts: async (req, res) => {
+		const {userId} = req;
+
 		try {
 			const data = await Blogs.find({userId}).sort({updatedAt: -1});
-			if (data)
-				return res.status(200).json({data});
+			if (data) return res.status(200).json({data});
+		} catch (error) {
+			console.log(error);
+			return res.status(500).json({message: error.message});
+		}
+	},
+	getUserRelatedPosts: async (req, res) => {
+		const {userId} = req.params;
+
+		try {
+			const data = await Blogs.find({userId}).sort({updatedAt: -1});
+			if (data) return res.status(200).json({data});
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({message: error.message});
@@ -26,11 +35,11 @@ const blogsController = {
 	},
 
 	createPost: async (req, res) => {
-    const {userId} = req.params;
+		const {userId, username} = req;
 
 		try {
-			const {title, body, createdBy} = req.body;
-			const newPost = new Blogs({title, body, createdBy, userId});
+			const {title, body} = req.body;
+			const newPost = new Blogs({title, body, createdBy: username, userId});
 			await newPost.save();
 			res.status(200).json({message: "Your post has been created"});
 		} catch (err) {
@@ -39,10 +48,22 @@ const blogsController = {
 	},
 
 	getSinglePost: async (req, res) => {
-    const {id} = req.params;
-    
-    try {
+		const {id} = req.params;
+
+		try {
 			const post = await Blogs.findById(id);
+			if (!post) return res.status(404).json({error: "Post not found"});
+			res.status(200).json({data: post});
+		} catch (err) {
+			res.status(500).json({message: "Internal Server Error Occured !"});
+		}
+	},
+
+	getSingleUserPost: async (req, res) => {
+		const {id} = req.params;
+		const {userId} = req;
+		try {
+			const post = await Blogs.findOne({_id: id, userId});
 			if (!post) return res.status(404).json({error: "Post not found"});
 			res.status(200).json({data: post});
 		} catch (err) {
@@ -69,10 +90,10 @@ const blogsController = {
 	},
 
 	deletePost: async (req, res) => {
-    const {id} = req.params;
-
+		const {id} = req.params;
+		const {userId} = req;
 		try {
-			const post = await Blogs.findByIdAndDelete(id);
+			const post = await Blogs.findOneAndDelete({_id: id, userId});
 			if (!post) return res.status(404).json({error: "Post not found"});
 			res.status(200).json({message: "Post deleted"});
 		} catch (err) {
