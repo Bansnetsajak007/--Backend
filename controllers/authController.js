@@ -1,4 +1,3 @@
-import jwt from "jsonwebtoken";
 import User from "../config/models/userModel.js";
 import bcrypt from "bcryptjs";
 import SendMailOtp from "../utils/phoneOpt.js";
