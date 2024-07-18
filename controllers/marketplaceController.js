@@ -2,7 +2,7 @@ import Marketplace from "../config/models/marketplaceModel.js";
 import deleteFile from "../utils/fileDelete.js";
 
 const marketController = {
-	get: async (req, res) => {
+	get: async (_, res) => {
 		try {
 			const data = await Marketplace.find().sort({updatedAt: -1});
 			// console.log(data);
@@ -13,7 +13,7 @@ const marketController = {
 	},
 
 	getUserSpecificPost: async (req, res) => {
-		const {userId} = req;
+		const {userId} = req.userData;
 		try {
 			const data = await Marketplace.find({userId}).sort({updatedAt: -1});
 			// console.log(data);
@@ -51,14 +51,10 @@ const marketController = {
 	},
 
 	createPost: async (req, res) => {
-		const {userId, username: postedBy, location} = req;
+		const {userId, username: postedBy, location} = req.userData;
 		// const {path, originalname} = req.file;
 
 		try {
-			// TODO: a seller can only sell from where he lives [in SignUp] / from anywhere?
-			// => currently, from where he lives
-			// const {itemName, price, details, location, type, date} =
-
 			const {itemName, price, details, type, itemType} = req.body;
 			// TODO: support for image
 			// const pictureUrlObj = {
@@ -78,7 +74,7 @@ const marketController = {
 				}, // TODO: picture adding
 				price: parseFloat(price),
 				details,
-				location: "Ratekhal", // TODO: location defaults to ratekhal. haven't integrated in signup yet
+				location,  // product will only be from where he/she signed up with
 				type,
 			});
 			await newMarketPost.save();
@@ -102,7 +98,7 @@ const marketController = {
 			const {...updateFields} = req.body;
 
 			const updateData = {};
-			const {userId} = req;
+			const {userId} = req.userData;
 
 			for (const key in updateFields) {
 				if (updateFields[key]) {
@@ -143,7 +139,6 @@ const marketController = {
 				.json({message: "Post Updated Successfully", data: updatedMarketPost});
 		} catch (error) {
 			// console.log(error);
-			const {userId} = req;
 
 			return res
 				.status(500)
@@ -154,7 +149,7 @@ const marketController = {
 	deletePost: async (req, res) => {
 		try {
 			const {itemId} = req.params;
-			const {userId} = req;
+			const {userId} = req.userData;
 
 			// Not required. But khatpat having
 			const marketPost = await Marketplace.findOne({_id: itemId, userId});

@@ -1,14 +1,8 @@
 import jwt from "jsonwebtoken";
 
 export default function storeToCookie (dbUser, res) {
-    const data = {
-        userId: dbUser._id,
-        username: dbUser.username,
-        email: dbUser.email,
-        phoneNumber: dbUser.phoneNumber,
-        type: dbUser.type,
-        location: dbUser.location
-    };
+    const {_id, password, __v, ...cookieData} = dbUser._doc;
+    const data = {...cookieData, userId: _id};
 
     const farmer_token = jwt.sign(data, process.env.JWT_SECRET, {
         expiresIn: "7d",

@@ -3,12 +3,13 @@ import bcrypt from "bcryptjs";
 import SendMailOtp from "../utils/phoneOpt.js";
 import storeToCookie from "../utils/cookieStore.js";
 
-
 const authController = {
 	// root
 	get: (req, res) => {
-		const {username, userId, phoneNumber, email, description, type} = req;
-		res.status(200).json({data: {username, userId, phoneNumber, email, description, type}});
+		const {userData} = req
+		res
+			.status(200)
+			.json({data: userData});
 	},
 
 	// Message based OTP verification
@@ -44,7 +45,17 @@ const authController = {
 	// END
 
 	SignUp: async (req, res) => {
-		const {username, email, password, phoneNumber, type, description, location} = req.body;
+		console.log(req.body)
+		const {
+			username,
+			email,
+			password,
+			phoneNumber,
+			type,
+			description,
+			location,
+			gender,
+		} = req.body;
 		// console.log(username, email, password, phoneNumber, type, description);
 		const hashedPassword = bcrypt.hashSync(password, 10);
 
@@ -55,28 +66,27 @@ const authController = {
 				password: hashedPassword,
 				phoneNumber,
 				type,
+				gender,
 				location,
-				description
+				description,
 			});
 			await newUser.save();
 
 			// store data in cookies utils
-			storeToCookie(newUser, res);
+			await storeToCookie(newUser, res);
 
-			return res.json({
+			return res.status(400).json({
 				message: `successfully created a user named ${username}`,
-				status: 200,
 			});
 		} catch (error) {
 			console.log(error);
-			return res.json({message: "couldn't SignUp!", status: 400});
+			return res.status(400).json({message: "couldn't SignUp!"});
 		}
 	},
 
 	//   GET credentials and login
 	Login: async (req, res) => {
 		const {email, password} = req.body;
-		// console.log(req.body)
 
 		try {
 			const dbUser = await User.findOne({email});
@@ -91,7 +101,7 @@ const authController = {
 			}
 
 			// data in cookie storage
-			const data = storeToCookie(dbUser, res);
+			const data = await storeToCookie(dbUser, res);
 
 			return res.status(200).json({message: "Successfully logged in", data});
 		} catch (err) {

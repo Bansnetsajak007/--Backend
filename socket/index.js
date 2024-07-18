@@ -23,9 +23,9 @@ io.on("connection", async (socket) => {
 	// using mongoDb _id as a socket identifier
 	//DON'T forget. client-socket will have auth: {token: mongoDB_id} in io connection
 	socket.id = socket.handshake.auth.token; // setting client's _id as socket_id in server
-	console.log(
-		`User connected: ${socket.id}, original socketId: ${mutableClientSocketId}`
-	);
+	// console.log(
+	// 	`User connected: ${socket.id}, original socketId: ${mutableClientSocketId}`
+	// );
 
 	socket.join(socket.id); // create one room
 	onlineUser.set(socket.id, mutableClientSocketId); // list of online users
@@ -162,7 +162,7 @@ io.on("connection", async (socket) => {
 	socket.on("disconnect", () => {
 		onlineUser.delete(mutableClientSocketId);
 		io.emit("onlineUser", Array.from(onlineUser.values()));
-		console.log("disconnect user ", socket.id, "\n");
+		// console.log("disconnect user ", socket.id, "\n");
 	});
 });
 
