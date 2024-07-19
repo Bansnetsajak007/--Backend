@@ -3,8 +3,10 @@ import { Router } from "express";
 const router = Router();
 // items
 import marketplaceController from "../controllers/marketplaceController.js";
+
 import fetchuser from "../middleware/fetchuser.js";
 import fileUpload from "../middleware/fileUpload.js";
+import fileDownload from "../middleware/fileDownload.js";
 
 // routes
 router.get("/", fetchuser, marketplaceController.get);
@@ -14,12 +16,12 @@ router.get("/posts", fetchuser, marketplaceController.getUserSpecificPost);
 router.get("/:itemId", marketplaceController.getIndividualPost);
 router.get("/related-item/:itemType", marketplaceController.getRelatedItems);
 
-// router.post("/", fetchuser, fileUpload.single("pictureUrl"), marketplaceController.createPost);
 // router.patch("/:itemId", fetchuser, fileUpload.single("pictureUrl"), marketplaceController.updatePost);
-//  TODO: Make support for product image
 router.post("/", fetchuser, marketplaceController.createPost);
-router.patch("/:itemId", fetchuser, marketplaceController.updatePost);
+router.patch("/img/:productId", fetchuser, fileUpload.single('productImg'), marketplaceController.uploadProductImage);
+router.get("/img/:photoId", fileDownload);
 
+router.patch("/:itemId", fetchuser, marketplaceController.updatePost);
 router.delete("/:itemId", fetchuser, marketplaceController.deletePost);
 
 

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-const {models, Schema, model} = mongoose;
+const {models, Schema, model, Types} = mongoose;
 
 const marketplaceSchema = new Schema({
 	userId: {
@@ -22,18 +22,10 @@ const marketplaceSchema = new Schema({
 		default: "animal",
 		require: true
 	},
-	pictureUrl: {
-		type: {
-			path: {
-				type: String,
-				required: true
-			},
-			name: {
-				type: String,
-				required: true	
-			}
-		},
-		require: true,
+	pictureId:{
+		type: Types.ObjectId,
+		ref: "ProfilePic",
+		default: null
 	},
 	price: {
 		type: Number,

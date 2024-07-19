@@ -1,5 +1,6 @@
 import User from "../config/models/userModel.js";
 import {Conversation} from "../config/models/chatModel.js";
+import storeToCookie from "../utils/cookieStore.js";
 
 const userController = {
 	getUserInfo: async (req, res) => {
@@ -58,11 +59,14 @@ const userController = {
 		const profilePicId = req.file.id;
 
 		try {
-			await User.findOneAndUpdate(
+			const updatedUser = await User.findOneAndUpdate(
 				{_id: userId},
-				{profilePicId}
+				{profilePicId},
+				{new: true}
 			);
-			res.status(200).json({message: "Successfully Updated Picture!"});
+			const data = await storeToCookie(updatedUser, res, profilePicId)
+
+			res.status(200).json({message: "Successfully Updated Picture!", data});
 		} catch (error) {
 			res.status(400).json({message: "Picture Updation Failed !!!"});
 		}

@@ -10,7 +10,7 @@ import { config } from 'dotenv';
 config();
 
 let gfs;
-const BUCKET_NAME = "ProfilePic";
+export const BUCKET_NAME = "ProfilePic";
 
 mongoConnection.once('open', ()=> {
     gfs = Grid(mongoConnection.db, mongoose.mongo);
@@ -21,7 +21,7 @@ const storage = new GridFsStorage({
     url: process.env.MONGO_URI,
     file: (req, file) => {
         return new Promise((resolve, reject)=> {
-            crypto.randomBytes(16, (err, buf)=> { // mongo bucket st from 256 kb, thus 16 byte i.e. 2^16
+            crypto.randomBytes(16, (err, buf)=> { // mongo bucket's chunk st from 256 kb, thus 16 byte i.e. 2^16
                 if (err) {
                     console.log(err)
                     return reject(err)

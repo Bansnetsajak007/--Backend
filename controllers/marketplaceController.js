@@ -33,7 +33,7 @@ const marketController = {
 			}
 			return res.status(200).json({message: "Data fetched successfully", data});
 		} catch (error) {
-			res.status(500).json({message: "Internal Server Error Occured!"})
+			res.status(500).json({message: "Internal Server Error Occured!"});
 		}
 	},
 
@@ -46,42 +46,27 @@ const marketController = {
 			});
 			res.status(200).json({data});
 		} catch (error) {
-			res.status(500).json({message: "Internal Server Error Occured!"})
+			res.status(500).json({message: "Internal Server Error Occured!"});
 		}
 	},
 
 	createPost: async (req, res) => {
 		const {userId, username: postedBy, location} = req.userData;
-		// const {path, originalname} = req.file;
 
 		try {
 			const {itemName, price, details, type, itemType} = req.body;
-			// TODO: support for image
-			// const pictureUrlObj = {
-			// 	path: path,
-			// 	name: originalname,
-			// };
 
 			const newMarketPost = await Marketplace.create({
 				userId,
 				postedBy,
 				itemType,
 				itemName,
-				// pictureUrl: pictureUrlObj , // TODO: picture adding
-				pictureUrl: {
-					path: "temp",
-					name: "tempVar",
-				}, // TODO: picture adding
 				price: parseFloat(price),
 				details,
-				location,  // product will only be from where he/she signed up with
+				location, // product will only be from where he/she signed up with
 				type,
 			});
 			await newMarketPost.save();
-
-			// TODO: on adding picture
-			// removing file from server's uploads folder
-			// deleteFile(pictureUrlObj.path);
 
 			return res
 				.status(200)
@@ -89,6 +74,23 @@ const marketController = {
 		} catch (error) {
 			console.log(error);
 			return res.status(500).json({message: "Couldn't create the post"});
+		}
+	},
+	uploadProductImage: async (req, res) => {
+		const {productId} = req.params;
+		const pictureId = req.file.id;
+
+		try {
+			const data = await Marketplace.findOneAndUpdate(
+				{_id: productId},
+				{pictureId},
+				{new: true}
+			);
+
+			res.status(200).json({message: "Successfully Updated Picture!", data});
+		} catch (error) {
+			console.log(error)
+			res.status(400).json({message: "Picture Updation Failed !!!"});
 		}
 	},
 
