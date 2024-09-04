@@ -12,7 +12,7 @@ const blogsController = {
 	},
 
 	getUserPosts: async (req, res) => {
-		const {userId} = req;
+		const {userId} = req.userData;
 
 		try {
 			const data = await Blogs.find({userId}).sort({updatedAt: -1});
@@ -35,7 +35,7 @@ const blogsController = {
 	},
 
 	createPost: async (req, res) => {
-		const {userId, username} = req;
+		const {userId, username} = req.userData;
 
 		try {
 			const {title, body} = req.body;
@@ -61,7 +61,7 @@ const blogsController = {
 
 	getSingleUserPost: async (req, res) => {
 		const {id} = req.params;
-		const {userId} = req;
+		const {userId} = req.userData;
 		try {
 			const post = await Blogs.findOne({_id: id, userId});
 			if (!post) return res.status(404).json({error: "Post not found"});
@@ -91,7 +91,7 @@ const blogsController = {
 
 	deletePost: async (req, res) => {
 		const {id} = req.params;
-		const {userId} = req;
+		const {userId} = req.userData;
 		try {
 			const post = await Blogs.findOneAndDelete({_id: id, userId});
 			if (!post) return res.status(404).json({error: "Post not found"});

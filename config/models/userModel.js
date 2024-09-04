@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 const {Schema, models, model} = mongoose
 
 const userSchema = new Schema({
@@ -25,6 +25,16 @@ const userSchema = new Schema({
 	location: {
 		type: String,
 		require: true
+	},
+	gender: {
+		type: String,
+		enum: ["Male", "Female"],
+		require: true
+	},
+	profilePicId: {
+		type: Types.ObjectId,
+		ref: "ProfilePic",
+		default: null
 	},
 	type: {
 		type: String,

@@ -2,7 +2,7 @@ import Marketplace from "../config/models/marketplaceModel.js";
 import deleteFile from "../utils/fileDelete.js";
 
 const marketController = {
-	get: async (req, res) => {
+	get: async (_, res) => {
 		try {
 			const data = await Marketplace.find().sort({updatedAt: -1});
 			// console.log(data);
@@ -13,7 +13,7 @@ const marketController = {
 	},
 
 	getUserSpecificPost: async (req, res) => {
-		const {userId} = req;
+		const {userId} = req.userData;
 		try {
 			const data = await Marketplace.find({userId}).sort({updatedAt: -1});
 			// console.log(data);
@@ -33,7 +33,7 @@ const marketController = {
 			}
 			return res.status(200).json({message: "Data fetched successfully", data});
 		} catch (error) {
-			res.status(500).json({message: "Internal Server Error Occured!"})
+			res.status(500).json({message: "Internal Server Error Occured!"});
 		}
 	},
 
@@ -46,46 +46,27 @@ const marketController = {
 			});
 			res.status(200).json({data});
 		} catch (error) {
-			res.status(500).json({message: "Internal Server Error Occured!"})
+			res.status(500).json({message: "Internal Server Error Occured!"});
 		}
 	},
 
 	createPost: async (req, res) => {
-		const {userId, username: postedBy, location} = req;
-		// const {path, originalname} = req.file;
+		const {userId, username: postedBy, location} = req.userData;
 
 		try {
-			// TODO: a seller can only sell from where he lives [in SignUp] / from anywhere?
-			// => currently, from where he lives
-			// const {itemName, price, details, location, type, date} =
-
 			const {itemName, price, details, type, itemType} = req.body;
-			// TODO: support for image
-			// const pictureUrlObj = {
-			// 	path: path,
-			// 	name: originalname,
-			// };
 
 			const newMarketPost = await Marketplace.create({
 				userId,
 				postedBy,
 				itemType,
 				itemName,
-				// pictureUrl: pictureUrlObj , // TODO: picture adding
-				pictureUrl: {
-					path: "temp",
-					name: "tempVar",
-				}, // TODO: picture adding
 				price: parseFloat(price),
 				details,
-				location: "Ratekhal", // TODO: location defaults to ratekhal. haven't integrated in signup yet
+				location, // product will only be from where he/she signed up with
 				type,
 			});
 			await newMarketPost.save();
-
-			// TODO: on adding picture
-			// removing file from server's uploads folder
-			// deleteFile(pictureUrlObj.path);
 
 			return res
 				.status(200)
@@ -95,6 +76,23 @@ const marketController = {
 			return res.status(500).json({message: "Couldn't create the post"});
 		}
 	},
+	uploadProductImage: async (req, res) => {
+		const {productId} = req.params;
+		const pictureId = req.file.id;
+
+		try {
+			const data = await Marketplace.findOneAndUpdate(
+				{_id: productId},
+				{pictureId},
+				{new: true}
+			);
+
+			res.status(200).json({message: "Successfully Updated Picture!", data});
+		} catch (error) {
+			console.log(error)
+			res.status(400).json({message: "Picture Updation Failed !!!"});
+		}
+	},
 
 	updatePost: async (req, res) => {
 		try {
@@ -102,7 +100,7 @@ const marketController = {
 			const {...updateFields} = req.body;
 
 			const updateData = {};
-			const {userId} = req;
+			const {userId} = req.userData;
 
 			for (const key in updateFields) {
 				if (updateFields[key]) {
@@ -143,7 +141,6 @@ const marketController = {
 				.json({message: "Post Updated Successfully", data: updatedMarketPost});
 		} catch (error) {
 			// console.log(error);
-			const {userId} = req;
 
 			return res
 				.status(500)
@@ -154,7 +151,7 @@ const marketController = {
 	deletePost: async (req, res) => {
 		try {
 			const {itemId} = req.params;
-			const {userId} = req;
+			const {userId} = req.userData;
 
 			// Not required. But khatpat having
 			const marketPost = await Marketplace.findOne({_id: itemId, userId});

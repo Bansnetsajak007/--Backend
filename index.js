@@ -10,8 +10,6 @@ import {app, server} from "./socket/index.js";
 // routes
 import marketplaceRoute from "./router/marketplaceRoute.js";
 import authRoute from "./router/authRoute.js";
-import chatRoute from "./router/chatRoute.js";
-import connectDB from "./config/dbConfig.js";
 import blogsRoute from "./router/blogsRoute.js";
 
 // useful route
@@ -62,23 +60,20 @@ app.use(cookieParser());
 // standard routes
 app.use("/auth", authRoute);
 app.use("/marketplace", marketplaceRoute);
-app.use("/chat", chatRoute);
 app.use("/blog", blogsRoute);
-
-// using route -> for socket testing
 app.use("/users", userRoute);
 
 // hosting
 const PORT = parseInt(process.env.PORT) || 6000;
 
-connectDB().then(() => {
-	// nodejs server
-	app.listen(PORT, () => {
-		console.log(`Server running at ${PORT}`);
-	});
-
-	// socket server
-	server.listen(PORT + 1, () => {
-		console.log(`Socket.io is running at ${PORT + 1}`);
-	});
+// connectDB().then(() => {
+// nodejs server
+app.listen(PORT, () => {
+	console.log(`Server running at ${PORT}`);
 });
+
+// socket server
+server.listen(PORT + 1, () => {
+	console.log(`Socket.io is running at ${PORT + 1}`);
+});
+// });
